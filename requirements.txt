@@ -3,6 +3,6 @@ fastapi==0.110.0
 uvicorn==0.29.0
 requests==2.31.0
 openai==1.14.2
-weaviate-client==3.25.4
+weaviate-client
 python-dotenv==1.0.1
 tqdm==4.66.2
