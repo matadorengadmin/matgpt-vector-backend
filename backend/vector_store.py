@@ -25,3 +25,7 @@ def store_message_in_weaviate(message_id, user, timestamp, channel, text, role):
         logging.info(f"Weaviate store success: {response.status_code}")
     except Exception as e:
         logging.error(f"Weaviate store error: {e}")
+
+# 🔧 This is the name your app is expecting:
+def add_slack_message(message_id, user, timestamp, channel, text, role):
+    store_message_in_weaviate(message_id, user, timestamp, channel, text, role)
