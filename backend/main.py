@@ -81,4 +81,4 @@ async def slack_events(request: Request):
         send_slack_message(channel, reply)
         return JSONResponse(content={"ok": True})
 
-    return JSONResponse(content={"ok": True"})
+    return JSONResponse(content={"ok": True})
