@@ -16,3 +16,4 @@ def run_command(task: str = Query(...)):
         except Exception as e:
             return {"status": "❌ Failed", "error": str(e)}
     return {"status": "❌ Unknown task"}
+
