@@ -10,16 +10,21 @@ app = FastAPI()
 
 WEAVIATE_URL = os.getenv("WEAVIATE_URL", "https://matgpt-vector-backend-production.up.railway.app")
 
+# ✅ FIXED: wrapped in "classes": []
 schema = {
-    "class": "SlackMessage",
-    "vectorizer": "text2vec-openai",
-    "properties": [
-        {"name": "message_id", "dataType": ["string"]},
-        {"name": "user", "dataType": ["string"]},
-        {"name": "timestamp", "dataType": ["string"]},
-        {"name": "channel", "dataType": ["string"]},
-        {"name": "text", "dataType": ["text"]},
-        {"name": "role", "dataType": ["string"]}
+    "classes": [
+        {
+            "class": "SlackMessage",
+            "vectorizer": "text2vec-openai",
+            "properties": [
+                {"name": "message_id", "dataType": ["string"]},
+                {"name": "user", "dataType": ["string"]},
+                {"name": "timestamp", "dataType": ["string"]},
+                {"name": "channel", "dataType": ["string"]},
+                {"name": "text", "dataType": ["text"]},
+                {"name": "role", "dataType": ["string"]}
+            ]
+        }
     ]
 }
 
