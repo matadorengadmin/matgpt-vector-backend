@@ -1,5 +1,3 @@
-# command_runner.py
-
 import os
 import logging
 import requests
@@ -10,49 +8,46 @@ app = FastAPI()
 
 WEAVIATE_URL = os.getenv("WEAVIATE_URL", "https://matgpt-vector-backend-production.up.railway.app")
 
+# ✅ SINGLE CLASS FORMAT — for /v1/schema
 schema = {
-    "classes": [
+    "class": "SlackMessage",
+    "description": "A message from Slack with metadata",
+    "vectorizer": "text2vec-openai",
+    "moduleConfig": {
+        "text2vec-openai": {
+            "vectorizeClassName": True
+        }
+    },
+    "properties": [
         {
-            "class": "SlackMessage",
-            "description": "A message from Slack with metadata",
-            "vectorizer": "text2vec-openai",
-            "moduleConfig": {
-                "text2vec-openai": {
-                    "vectorizeClassName": True
-                }
-            },
-            "properties": [
-                {
-                    "name": "message_id",
-                    "description": "Unique identifier for the Slack message",
-                    "dataType": ["text"]
-                },
-                {
-                    "name": "user",
-                    "description": "User who sent the message",
-                    "dataType": ["text"]
-                },
-                {
-                    "name": "timestamp",
-                    "description": "Time when message was sent",
-                    "dataType": ["text"]
-                },
-                {
-                    "name": "channel",
-                    "description": "Slack channel of the message",
-                    "dataType": ["text"]
-                },
-                {
-                    "name": "text",
-                    "description": "Actual message content",
-                    "dataType": ["text"]
-                },
-                {
-                    "name": "role",
-                    "description": "Role of sender (user or assistant)",
-                    "dataType": ["text"]
-                }
-            ]
+            "name": "message_id",
+            "description": "Unique identifier for the Slack message",
+            "dataType": ["text"]
+        },
+        {
+            "name": "user",
+            "description": "User who sent the message",
+            "dataType": ["text"]
+        },
+        {
+            "name": "timestamp",
+            "description": "Time when message was sent",
+            "dataType": ["text"]
+        },
+        {
+            "name": "channel",
+            "description": "Slack channel of the message",
+            "dataType": ["text"]
+        },
+        {
+            "name": "text",
+            "description": "Actual message content",
+            "dataType": ["text"]
+        },
+        {
+            "name": "role",
+            "description": "Role of sender (user or assistant)",
+            "dataType": ["text"]
         }
     ]
 }
@@ -73,5 +68,3 @@ def run(task: str):
             logging.error(f"❌ Schema creation failed: {e}")
             return JSONResponse(status_code=500, content={"error": str(e)})
     return JSONResponse(status_code=404, content={"detail": "Not Found"})
-
-
