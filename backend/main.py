@@ -1,4 +1,5 @@
 # backend/main.py
+
 import os
 import json
 import logging
@@ -20,7 +21,6 @@ async def slack_events(request: Request):
     body = await request.json()
     logging.info(f"Incoming Slack event body: {body}")
 
-    # Slack URL verification (for Slack app setup)
     if body.get("type") == "url_verification":
         return JSONResponse(content={"challenge": body["challenge"]})
 
@@ -48,45 +48,41 @@ async def slack_events(request: Request):
         history = history[-10:]
 
         try:
-            logging.info("🔍 Calling ask_openai() with history:")
-            logging.info(history)
-
             reply = ask_openai(history)
             history.append({"role": "assistant", "content": reply})
 
             with open(history_path, "w") as f:
                 json.dump(history, f)
 
-            # Save user message to Weaviate
-            logging.info("📦 Logging user message to Weaviate")
-            add_slack_message(
-                message_id=message_id,
-                user=user,
-                timestamp=timestamp,
-                channel=channel,
-                text=text,
-                role="user"
-            )
+            # Save to Weaviate
+            try:
+                logging.info("📦 Logging user message to Weaviate")
+                add_slack_message(
+                    message_id=message_id,
+                    user=user,
+                    timestamp=timestamp,
+                    channel=channel,
+                    text=text,
+                    role="user"
+                )
 
-            # Save assistant response to Weaviate
-            logging.info("📦 Logging assistant response to Weaviate")
-            add_slack_message(
-                message_id=message_id + "_response",
-                user="matgpt-devbot",
-                timestamp=timestamp,
-                channel=channel,
-                text=reply,
-                role="assistant"
-            )
+                logging.info("📦 Logging assistant response to Weaviate")
+                add_slack_message(
+                    message_id=message_id + "_response",
+                    user="matgpt-devbot",
+                    timestamp=timestamp,
+                    channel=channel,
+                    text=reply,
+                    role="assistant"
+                )
+            except Exception as weaviate_error:
+                logging.error(f"❌ Failed to store in Weaviate: {weaviate_error}")
 
         except Exception as e:
-            logging.error("🛑 Exception inside try block:")
-            logging.exception(e)
+            logging.error(f"OpenAI error: {e}")
             reply = "Sorry, I had trouble thinking just now. Try again in a sec?"
 
-        # Send the bot's reply back to Slack
         send_slack_message(channel, reply)
         return JSONResponse(content={"ok": True})
 
     return JSONResponse(content={"ok": True})
-
