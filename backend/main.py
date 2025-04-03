@@ -20,6 +20,7 @@ async def slack_events(request: Request):
     body = await request.json()
     logging.info(f"Incoming Slack event body: {body}")
 
+    # Slack URL verification (for Slack app setup)
     if body.get("type") == "url_verification":
         return JSONResponse(content={"challenge": body["challenge"]})
 
@@ -47,13 +48,16 @@ async def slack_events(request: Request):
         history = history[-10:]
 
         try:
+            logging.info("🔍 Calling ask_openai() with history:")
+            logging.info(history)
+
             reply = ask_openai(history)
             history.append({"role": "assistant", "content": reply})
 
             with open(history_path, "w") as f:
                 json.dump(history, f)
 
-            # Save to Weaviate
+            # Save user message to Weaviate
             logging.info("📦 Logging user message to Weaviate")
             add_slack_message(
                 message_id=message_id,
@@ -64,6 +68,7 @@ async def slack_events(request: Request):
                 role="user"
             )
 
+            # Save assistant response to Weaviate
             logging.info("📦 Logging assistant response to Weaviate")
             add_slack_message(
                 message_id=message_id + "_response",
@@ -75,10 +80,13 @@ async def slack_events(request: Request):
             )
 
         except Exception as e:
-            logging.error(f"OpenAI error: {e}")
+            logging.error("🛑 Exception inside try block:")
+            logging.exception(e)
             reply = "Sorry, I had trouble thinking just now. Try again in a sec?"
 
+        # Send the bot's reply back to Slack
         send_slack_message(channel, reply)
         return JSONResponse(content={"ok": True})
 
     return JSONResponse(content={"ok": True})
+
