@@ -8,7 +8,7 @@ import httpx
 
 # === ENVIRONMENT ===
 SLACK_BOT_TOKEN = os.getenv("SLACK_BOT_TOKEN")
-OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")  # This is used in code
 WEAVIATE_URL = os.getenv("WEAVIATE_URL", "https://matgpt-vector-backend-production.up.railway.app")
 
 # === APP SETUP ===
@@ -39,16 +39,29 @@ async def slack_events(request: Request):
         logging.info(f"User {user} mentioned the bot in {channel} saying: {text}")
 
         # Load conversation history
-        history = load_history()
+        history_path = "conversation_history.json"
+        history = []
+        if os.path.exists(history_path):
+            try:
+                with open(history_path, "r") as f:
+                    history = json.load(f)
+            except Exception as e:
+                logging.error(f"Failed to load history: {e}")
+
         history.append({"role": "user", "content": text})
         history = history[-10:]
 
         try:
             reply = ask_openai(history)
             history.append({"role": "assistant", "content": reply})
-            save_history(history)
 
+            with open(history_path, "w") as f:
+                json.dump(history, f)
+
+            print("📬 Calling log_to_weaviate for user message...")
             log_to_weaviate(message_id, user, timestamp, channel, text, "user")
+
+            print("📬 Calling log_to_weaviate for assistant response...")
             log_to_weaviate(message_id + "_response", "matgpt-devbot", timestamp, channel, reply, "assistant")
 
         except Exception as e:
@@ -60,26 +73,9 @@ async def slack_events(request: Request):
 
     return JSONResponse(content={"ok": True})
 
-# === HISTORY ===
-def load_history():
-    try:
-        if os.path.exists("conversation_history.json"):
-            with open("conversation_history.json", "r") as f:
-                return json.load(f)
-    except Exception as e:
-        logging.error(f"Failed to load history: {e}")
-    return []
-
-def save_history(history):
-    try:
-        with open("conversation_history.json", "w") as f:
-            json.dump(history, f)
-    except Exception as e:
-        logging.error(f"Failed to save history: {e}")
-
 # === OPENAI ===
 def ask_openai(history):
-    logging.info("🧠 Preparing request for OpenAI")
+    logging.info("Preparing request for OpenAI")
     headers = {
         "Authorization": f"Bearer {OPENAI_API_KEY}",
         "Content-Type": "application/json"
@@ -94,7 +90,7 @@ def ask_openai(history):
 
 # === SLACK ===
 def send_slack_message(channel: str, text: str):
-    logging.info(f"📢 Sending reply to Slack: {text}")
+    logging.info(f"Using SLACK_BOT_TOKEN: {SLACK_BOT_TOKEN[:12]}...")
     url = "https://slack.com/api/chat.postMessage"
     headers = {
         "Authorization": f"Bearer {SLACK_BOT_TOKEN}",
@@ -109,6 +105,9 @@ def send_slack_message(channel: str, text: str):
 
 # === WEAVIATE ===
 def log_to_weaviate(message_id, user, timestamp, channel, text, role):
+    print(f"🟡 Entered log_to_weaviate for {role}: {text[:30]}")
+    logging.info(f"🟡 Entered log_to_weaviate for {role}: {text[:30]}")
+
     payload = {
         "class": "SlackMessage",
         "properties": {
@@ -120,6 +119,7 @@ def log_to_weaviate(message_id, user, timestamp, channel, text, role):
             "role": role
         }
     }
+
     logging.info(f"📤 Sending to Weaviate: {WEAVIATE_URL}/v1/objects")
     logging.info(f"📦 Payload: {payload}")
     try:
@@ -129,3 +129,4 @@ def log_to_weaviate(message_id, user, timestamp, channel, text, role):
     except Exception as e:
         logging.error(f"❌ Weaviate store error: {e}")
         logging.error(f"❌ Full response (if available): {getattr(response, 'text', 'No response')}")
+
