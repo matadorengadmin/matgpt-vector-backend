@@ -32,4 +32,5 @@ def store_message_in_weaviate(message_id, user, timestamp, channel, text, role):
 
 # 🔧 This is the name your app expects:
 def add_slack_message(message_id, user, timestamp, channel, text, role):
+    logging.info(f"🧠 add_slack_message called for: {role} - {text[:30]}")
     store_message_in_weaviate(message_id, user, timestamp, channel, text, role)
