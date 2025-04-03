@@ -1,3 +1,5 @@
+# backend/vector_store.py
+
 import os
 import requests
 import logging
@@ -17,7 +19,8 @@ def store_message_in_weaviate(message_id, user, timestamp, channel, text, role):
         }
     }
 
-    logging.info(f"📤 Sending to Weaviate: {payload}")
+    logging.info(f"🔁 Sending to Weaviate at {WEAVIATE_URL}/v1/objects")
+    logging.info(f"📦 Payload: {payload}")
 
     try:
         response = requests.post(f"{WEAVIATE_URL}/v1/objects", json=payload)
@@ -25,7 +28,8 @@ def store_message_in_weaviate(message_id, user, timestamp, channel, text, role):
         logging.info(f"✅ Weaviate response: {response.status_code} - {response.text}")
     except Exception as e:
         logging.error(f"❌ Weaviate store error: {e}")
+        logging.error(f"❌ Full response (if available): {getattr(response, 'text', 'No response')}")
 
+# 🔧 This is the name your app expects:
 def add_slack_message(message_id, user, timestamp, channel, text, role):
-    logging.info(f"📦 add_slack_message() called for message_id={message_id}")
     store_message_in_weaviate(message_id, user, timestamp, channel, text, role)
