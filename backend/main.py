@@ -1,4 +1,4 @@
-# main.py
+# backend/main.py
 import os
 import json
 import logging
@@ -54,6 +54,7 @@ async def slack_events(request: Request):
                 json.dump(history, f)
 
             # Save to Weaviate
+            logging.info("📦 Logging user message to Weaviate")
             add_slack_message(
                 message_id=message_id,
                 user=user,
@@ -62,6 +63,8 @@ async def slack_events(request: Request):
                 text=text,
                 role="user"
             )
+
+            logging.info("📦 Logging assistant response to Weaviate")
             add_slack_message(
                 message_id=message_id + "_response",
                 user="matgpt-devbot",
@@ -78,4 +81,4 @@ async def slack_events(request: Request):
         send_slack_message(channel, reply)
         return JSONResponse(content={"ok": True})
 
-    return JSONResponse(content={"ok": True})
+    return JSONResponse(content={"ok": True"})
