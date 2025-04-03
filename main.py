@@ -38,25 +38,15 @@ async def slack_events(request: Request):
 
         logging.info(f"User {user} mentioned the bot in {channel} saying: {text}")
 
-        # Load history
-        history_path = "conversation_history.json"
-        history = []
-        if os.path.exists(history_path):
-            try:
-                with open(history_path, "r") as f:
-                    history = json.load(f)
-            except Exception as e:
-                logging.error(f"Failed to load history: {e}")
-
+        # Load conversation history
+        history = load_history()
         history.append({"role": "user", "content": text})
         history = history[-10:]
 
         try:
             reply = ask_openai(history)
             history.append({"role": "assistant", "content": reply})
-
-            with open(history_path, "w") as f:
-                json.dump(history, f)
+            save_history(history)
 
             log_to_weaviate(message_id, user, timestamp, channel, text, "user")
             log_to_weaviate(message_id + "_response", "matgpt-devbot", timestamp, channel, reply, "assistant")
@@ -70,9 +60,26 @@ async def slack_events(request: Request):
 
     return JSONResponse(content={"ok": True})
 
+# === HISTORY ===
+def load_history():
+    try:
+        if os.path.exists("conversation_history.json"):
+            with open("conversation_history.json", "r") as f:
+                return json.load(f)
+    except Exception as e:
+        logging.error(f"Failed to load history: {e}")
+    return []
+
+def save_history(history):
+    try:
+        with open("conversation_history.json", "w") as f:
+            json.dump(history, f)
+    except Exception as e:
+        logging.error(f"Failed to save history: {e}")
+
 # === OPENAI ===
 def ask_openai(history):
-    logging.info("Preparing request for OpenAI")
+    logging.info("🧠 Preparing request for OpenAI")
     headers = {
         "Authorization": f"Bearer {OPENAI_API_KEY}",
         "Content-Type": "application/json"
@@ -87,7 +94,7 @@ def ask_openai(history):
 
 # === SLACK ===
 def send_slack_message(channel: str, text: str):
-    logging.info(f"Using SLACK_BOT_TOKEN: {SLACK_BOT_TOKEN[:12]}...")
+    logging.info(f"📢 Sending reply to Slack: {text}")
     url = "https://slack.com/api/chat.postMessage"
     headers = {
         "Authorization": f"Bearer {SLACK_BOT_TOKEN}",
