@@ -1,3 +1,5 @@
+# vector_store.py
+
 import os
 import logging
 import requests
@@ -26,3 +28,4 @@ def log_to_weaviate(message_id, user, timestamp, channel, text, role):
     except Exception as e:
         logging.error(f"❌ Weaviate store error: {e}")
         logging.error(f"❌ Full response (if available): {getattr(response, 'text', 'No response')}")
+
