@@ -1,14 +1,9 @@
-# Use the official Weaviate image that supports modules
-FROM semitechnologies/weaviate:1.25.2
+# Use official modular Weaviate image with OpenAI vectorizer support
+FROM semitechnologies/weaviate:1.25.3-mod
 
-# Enable the text2vec-openai module
-ENV ENABLE_MODULES="text2vec-openai"
+# These are required, but values will be injected securely by Railway at runtime
+ENV ENABLE_MODULES=text2vec-openai
+ENV OPENAI_APIKEY=will-be-set-in-Railway
 
-# Set the OpenAI API key (ensure this is set securely in your environment)
-ENV OPENAI_APIKEY="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"
-
-# Expose the default Weaviate port
+# Expose Weaviate port (Railway does this automatically)
 EXPOSE 8080
-
-# Start Weaviate
-CMD ["./weaviate"]
