@@ -8,7 +8,7 @@ app = FastAPI()
 
 WEAVIATE_URL = os.getenv("WEAVIATE_URL", "https://matgpt-vector-backend-production.up.railway.app")
 
-# ✅ UPDATED: camelCase property names
+# ✅ FIXED: CamelCase + valid OpenAI vectorizer schema
 schema = {
     "class": "SlackMessage",
     "description": "A message from Slack with metadata",
@@ -51,7 +51,7 @@ schema = {
         },
         {
             "name": "threadTs",
-            "description": "Thread timestamp",
+            "description": "Thread timestamp for Slack threads",
             "dataType": ["text"]
         }
     ]
@@ -66,7 +66,7 @@ def run(task: str):
     if task == "create_schema":
         try:
             logging.info(f"📤 Posting schema to {WEAVIATE_URL}/v1/schema")
-            response = requests.post(f"{WEAVIATE_URL}/v1/schema", json=schema)
+            response = requests.post(f"{WEAVIATE_URL}/v1/schema", json={"classes": [schema]})
             response.raise_for_status()
             return {"status": "✅ Schema created", "response": response.json()}
         except Exception as e:
