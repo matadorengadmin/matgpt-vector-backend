@@ -8,7 +8,7 @@ app = FastAPI()
 
 WEAVIATE_URL = os.getenv("WEAVIATE_URL", "https://matgpt-vector-backend-production.up.railway.app")
 
-# ✅ Final schema — camelCase property names with OpenAI vectorization
+# ✅ UPDATED: camelCase property names
 schema = {
     "class": "SlackMessage",
     "description": "A message from Slack with metadata",
@@ -22,44 +22,37 @@ schema = {
         {
             "name": "messageId",
             "description": "Unique identifier for the Slack message",
-            "dataType": ["text"],
-            "indexFilterable": True
+            "dataType": ["text"]
         },
         {
             "name": "user",
             "description": "User who sent the message",
-            "dataType": ["text"],
-            "indexFilterable": True
+            "dataType": ["text"]
         },
         {
             "name": "timestamp",
             "description": "Time when message was sent",
-            "dataType": ["text"],
-            "indexFilterable": True
+            "dataType": ["text"]
         },
         {
             "name": "channel",
             "description": "Slack channel of the message",
-            "dataType": ["text"],
-            "indexFilterable": True
+            "dataType": ["text"]
         },
         {
             "name": "text",
             "description": "Actual message content",
-            "dataType": ["text"],
-            "indexFilterable": True
+            "dataType": ["text"]
         },
         {
             "name": "role",
             "description": "Role of sender (user or assistant)",
-            "dataType": ["text"],
-            "indexFilterable": True
+            "dataType": ["text"]
         },
         {
             "name": "threadTs",
-            "description": "Slack thread timestamp, if part of a thread",
-            "dataType": ["text"],
-            "indexFilterable": True
+            "description": "Thread timestamp",
+            "dataType": ["text"]
         }
     ]
 }
@@ -80,5 +73,6 @@ def run(task: str):
             logging.error(f"❌ Schema creation failed: {e}")
             return JSONResponse(status_code=500, content={"error": str(e)})
     return JSONResponse(status_code=404, content={"detail": "Not Found"})
+
 
 
