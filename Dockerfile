@@ -37,7 +37,6 @@ RUN GOOS=linux GOARCH=$TARGETARCH go build $EXTRA_BUILD_ARGS \
       -o /weaviate-server ./cmd/weaviate-server
 
 ###############################################################################
-
 # This creates an image that can be used to fake an api for telemetry acceptance test purposes
 FROM build_base AS telemetry_mock_api
 COPY . .
@@ -48,8 +47,16 @@ ENTRYPOINT ["./tools/dev/telemetry_mock_api.sh"]
 FROM alpine AS weaviate
 ENTRYPOINT ["/bin/weaviate"]
 COPY --from=server_builder /weaviate-server /bin/weaviate
+
+# ✅ REQUIRED for text2vec-openai support
+RUN apk add --no-cache --upgrade bash ca-certificates openssl curl unzip
+RUN mkdir -p /modules/text2vec-openai
+RUN curl -L https://github.com/weaviate/modules/releases/latest/download/text2vec-openai.zip -o /tmp/text2vec-openai.zip && \
+    unzip /tmp/text2vec-openai.zip -d /modules/text2vec-openai && \
+    rm /tmp/text2vec-openai.zip
+
 RUN mkdir -p /go/pkg/mod/github.com/go-ego
 COPY --from=server_builder /go/pkg/mod/github.com/go-ego /go/pkg/mod/github.com/go-ego
-RUN apk add --no-cache --upgrade bc ca-certificates openssl
-RUN mkdir ./modules
-CMD [ "--host", "0.0.0.0", "--port", "8080", "--scheme", "http"]
+
+CMD [ "--host", "0.0.0.0", "--port", "8080", "--scheme", "http" ]
+
