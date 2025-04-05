@@ -1,11 +1,11 @@
-# Use modular Weaviate image with support for OpenAI module
-FROM semitechnologies/weaviate:1.25.2-mod
+# Use modular Weaviate image with OpenAI vectorizer support
+FROM semitechnologies/weaviate:1.25.2-module
 
-# Enable the OpenAI text vectorization module
+# Enable OpenAI text vectorizer module
 ENV ENABLE_MODULES="text2vec-openai"
 
-# Optional: override with dummy key (actual set in Railway variables)
+# Optional: dummy key — actual key should be set in Railway environment variables
 ENV OPENAI_APIKEY="your-api-key-will-be-overridden-by-Railway"
 
-# Optional: expose port
+# Optional port exposure
 EXPOSE 8080
