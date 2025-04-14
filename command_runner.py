@@ -54,6 +54,12 @@ schema = {
             "description": "Thread timestamp for Slack threads",
             "dataType": ["text"]
         }
+        {
+            "name": "tags",
+            "description": "Tags for categorizing messages or uploaded content",
+            "dataType": ["text[]"]
+        }
+
     ]
 }
 
