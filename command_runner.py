@@ -73,12 +73,23 @@ def run(task: str):
         try:
             logging.info(f"📤 Posting schema to {WEAVIATE_URL}/v1/schema")
             response = requests.post(f"{WEAVIATE_URL}/v1/schema", json={"classes": [schema]})
-            response.raise_for_status()
-            return {"status": "✅ Schema created", "response": response.json()}
+            if response.status_code == 200:
+                logging.info("✅ Schema created successfully.")
+                return {"status": "✅ Schema created", "response": response.json()}
+            else:
+                # Log full response from Weaviate
+                logging.error(f"❌ Schema creation failed.\nStatus: {response.status_code}\nResponse: {response.text}")
+                return JSONResponse(status_code=500, content={
+                    "status": "error",
+                    "status_code": response.status_code,
+                    "response": response.text
+                })
         except Exception as e:
-            logging.error(f"❌ Schema creation failed: {e}")
+            logging.exception("❌ Exception during schema creation")
             return JSONResponse(status_code=500, content={"error": str(e)})
+
     return JSONResponse(status_code=404, content={"detail": "Not Found"})
+
 
 
 
