@@ -24,7 +24,7 @@ schema = {
 
 response = requests.post(
     f"{WEAVIATE_URL}/v1/schema",
-    json=schema,
+    json={"classes": [schema]}
     headers={"Content-Type": "application/json"}
 )
 
