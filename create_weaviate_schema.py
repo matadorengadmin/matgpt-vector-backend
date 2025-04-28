@@ -54,8 +54,54 @@ thread_association_schema = {
     ]
 }
 
+# Define CodeFile schema
+codefile_schema = {
+    "class": "CodeFile",
+    "description": "Stores code files from the Shadow DevBot repo",
+    "vectorizer": "text2vec-openai",
+    "moduleConfig": {
+        "text2vec-openai": {
+            "vectorizeClassName": True
+        }
+    },
+    "properties": [
+        {
+            "name": "filename",
+            "dataType": ["text"],
+            "description": "The relative path of the file, like backend/main.py",
+            "moduleConfig": {
+                "text2vec-openai": {"skip": False}
+            }
+        },
+        {
+            "name": "content",
+            "dataType": ["text"],
+            "description": "The full content of the file",
+            "moduleConfig": {
+                "text2vec-openai": {"skip": False}
+            }
+        },
+        {
+            "name": "commitHash",
+            "dataType": ["text"],
+            "description": "The git commit hash when this version was saved",
+            "moduleConfig": {
+                "text2vec-openai": {"skip": True}
+            }
+        },
+        {
+            "name": "lastUpdated",
+            "dataType": ["date"],
+            "description": "Timestamp when this file version was saved",
+            "moduleConfig": {
+                "text2vec-openai": {"skip": True}
+            }
+        }
+    ]
+}
+
 # Bundle all schemas
-all_schemas = [slack_schema, upgrade_log_schema, thread_association_schema]
+all_schemas = [slack_schema, upgrade_log_schema, thread_association_schema, codefile_schema]
 
 for schema in all_schemas:
     response = requests.post(
