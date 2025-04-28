@@ -19,7 +19,8 @@ slack_schema = {
         {"name": "channel", "dataType": ["text"]},
         {"name": "text", "dataType": ["text"]},
         {"name": "role", "dataType": ["text"]},
-        {"name": "thread_ts", "dataType": ["text"]}  # optional for threads
+        {"name": "thread_ts", "dataType": ["text"]},
+        {"name": "app", "dataType": ["text"]}   # <-- NEW
     ]
 }
 
