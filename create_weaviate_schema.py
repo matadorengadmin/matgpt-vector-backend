@@ -100,8 +100,41 @@ codefile_schema = {
     ]
 }
 
+# Define ShadowFile schema
+shadow_file_schema = {
+    "class": "ShadowFile",
+    "description": "Stores upgraded files from the Shadow DevBot repo",
+    "vectorizer": "none",
+    "properties": [
+        {
+            "name": "fileName",
+            "dataType": ["text"],
+            "description": "The filename (e.g., main.py)",
+        },
+        {
+            "name": "content",
+            "dataType": ["text"],
+            "description": "The full content of the file",
+        },
+        {
+            "name": "appName",
+            "dataType": ["text"],
+            "description": "The app name this file belongs to (e.g., __shadow__)",
+        }
+    ]
+}
+
+
+
 # Bundle all schemas
-all_schemas = [slack_schema, upgrade_log_schema, thread_association_schema, codefile_schema]
+all_schemas = [
+    slack_schema,
+    upgrade_log_schema,
+    thread_association_schema,
+    codefile_schema,
+    shadow_file_schema,  # <-- add here
+]
+
 
 for schema in all_schemas:
     response = requests.post(
